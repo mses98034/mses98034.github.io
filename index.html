@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊時的藍色高亮 */
+        }
+
+        nav {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background-color: rgba(255, 215, 0, 0.98);
+            transform: translateY(0);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #333;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 80px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 245, 184, 0.3) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('pattern.png') repeat;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1s ease-out 0.5s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        .app-preview {
+            width: auto;
+            max-width: 300px;
+            height: auto;
+            margin: 2rem auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: block;
+        }
+
+        .cta-button {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            border: none;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            display: inline-block;
+            padding: 1rem 2rem;
+            color: #333;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .cta-button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .features {
+            padding: 5rem 2rem;
+            background: #ffffff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffd700;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            color: #ffd700;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #333;
+            font-size: 2.5rem;
+        }
+
+        .privacy {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .privacy-content {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .privacy-content h2 {
+            color: #333;
+            margin: 3rem 0 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .privacy-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .privacy-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .privacy-content .update-date {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .privacy-section {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 768px) {
+            .nav-content {
+                position: relative;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                right: -2rem;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                padding: 1rem;
+                border-radius: 0 0 10px 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                display: none;
+                flex-direction: column;
+                width: 200px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                margin: 0.5rem 0;
+                padding: 0.5rem 1rem;
+                border-radius: 5px;
+            }
+
+            .nav-links a:hover {
+                background: rgba(255, 215, 0, 0.1);
+            }
+
+            .hero {
+                padding-top: 60px;
+            }
+
+            .hero-content {
+                padding: 1rem;
+            }
+
+            .app-preview {
+                width: 80%;
+                max-width: 250px;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                padding: 0 1rem;
+            }
+
+            .privacy-section {
+                margin: 0 1rem;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .footer p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .footer .contact-email {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+
+        .footer .contact-email a {
+            color: #ffd700;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer .contact-email a:hover {
+            color: #ffed4a;
+            text-decoration: underline;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo-container">
+                <i class="fas fa-dice logo-icon"></i>
+                <span class="logo">Foodice</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">功能特色</a>
+                <a href="#usage">使用方式</a>
+                <a href="#privacy">隱私權政策</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>不再為吃什麼煩惱</h1>
+            <p>透過隨機抽取餐廳功能，幫助你快速決定用餐地點。支援距離、評分、類型篩選，提供更符合需求的推薦，讓決策更輕鬆。</p>
+            <img src="Group 3.png" alt="Foodice App 預覽" class="app-preview">
+            <a href="https://apps.apple.com/tw/app/foodice/id6741527599" target="_blank" class="cta-button">立即下載</a>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2 class="section-title">功能特色</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-dice feature-icon"></i>
+                <h3>隨機抽選餐廳</h3>
+                <p>點擊「骰子」，快速決定餐廳，告別選擇困難</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-filter feature-icon"></i>
+                <h3>智能篩選</h3>
+                <p>根據距離、評分、美食類型自訂篩選條件</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-map-marked-alt feature-icon"></i>
+                <h3>Google 地圖整合</h3>
+                <p>即時顯示餐廳位置並提供導航功能</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-heart feature-icon"></i>
+                <h3>收藏與分享</h3>
+                <p>儲存喜愛的餐廳並輕鬆分享給朋友</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bell feature-icon"></i>
+                <h3>每日推薦通知</h3>
+                <p>開啟通知功能，獲取周遭的每日精選美食推薦</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="usage">
+        <h2 class="section-title">使用方式</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-location-arrow feature-icon"></i>
+                <h3>步驟 1</h3>
+                <p>開啟應用程式，允許定位權限以獲取附近的餐廳</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-sliders-h feature-icon"></i>
+                <h3>步驟 2</h3>
+                <p>設定篩選條件，例如距離、評分或餐廳類型</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-search feature-icon"></i>
+                <h3>步驟 3</h3>
+                <p>點擊「搜尋」，獲取符合條件的餐廳清單</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-route feature-icon"></i>
+                <h3>步驟 4</h3>
+                <p>按下「骰子」選定餐廳後，可直接使用導航前往</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="privacy" id="privacy">
+        <div class="privacy-content">
+            <div class="privacy-section">
+                <h2 class="section-title">隱私權政策</h2>
+                <p class="privacy-intro">Foodice 致力於保護您的隱私。我們的應用程式不會收集任何個人資料。</p>
+
+                <h2>資料收集</h2>
+                <p>我們不會從這個 App 收集任何資料。App 僅會在您允許的情況下使用位置服務，以便為您提供附近的餐廳推薦。這些位置資訊僅在本地使用，不會被上傳或儲存。</p>
+
+                <h2>Google 地圖服務</h2>
+                <p>我們使用 Google 地圖服務來顯示餐廳位置和提供導航功能。使用這些功能時，您可能需要遵守 Google 的隱私權政策。</p>
+
+                <h2>資料安全</h2>
+                <p>由於我們不收集任何用戶資料，您可以安心使用我們的服務，無需擔心個人資訊外洩的風險。</p>
+
+                <p class="update-date">最後更新日期：2024年</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>Foodice &reg; 2024</p>
+        <p>開發者：Ling Lee</p>
+        <p>版權所有 &copy; 2024 保留一切權利</p>
+        <p class="contact-email">
+            需要協助或意見回饋？請聯絡我們：<a href="mailto:leohandsome891101@gmail.com">leohandsome891101@gmail.com</a>
+        </p>
+    </footer>
+
+    <script>
+        // 現有的滾動事件監聽
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // 手機版選單控制
+        const mobileMenuBtn = document.createElement('button');
+        mobileMenuBtn.className = 'mobile-menu-btn';
+        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        
+        const navContent = document.querySelector('.nav-content');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navContent.insertBefore(mobileMenuBtn, navLinks);
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            this.innerHTML = navLinks.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
+        });
+
+        // 點擊導航連結時關閉選單
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // 點擊頁面其他地方時關閉選單
+        document.addEventListener('click', (e) => {
+            if (!navContent.contains(e.target)) {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
